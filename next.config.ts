@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   },
   cacheComponents: true,
   partialPrefetching: true,
+  allowedDevOrigins: [
+    "interspersedly-multijugate-naida.ngrok-free.dev",
+  ],
   turbopack: {
     rules: {
       "*.css": {

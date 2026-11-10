@@ -11,10 +11,12 @@ import {
 } from "lucide-react";
 import { signOut,useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 interface itemArr {
   id: number;
   item: string;
   icon: string;
+  link:string
 }
 
 const iconRender: Record<string, LucideIcon> = {
@@ -30,26 +32,31 @@ const Sidebar: React.FC = () => {
       id: 1,
       item: "Overview",
       icon: "card",
+      link:"/dashboard"
     },
     {
       id: 2,
       item: "Repositories",
       icon: "git",
+      link:"",
     },
     {
       id: 3,
       item: "Pull Requests",
       icon: "git",
+      link:"",
     },
     {
       id: 4,
       item: "Github Apps",
       icon: "git",
+      link:"/dashboard/github",
     },
     {
       id: 5,
       item: "Settings",
       icon: "settings",
+      link:"",
     },
   ];
     const handleLogout=async()=>{
@@ -67,10 +74,12 @@ const Sidebar: React.FC = () => {
         const IconComponent = iconRender[i.icon] || CardSim;
         return (
           <div key={i.id}>
-            <div className="flex items-center gap-x-4">
+           <Link href={i.link}>
+               <div className="flex items-center gap-x-4">
               <IconComponent size={20} />
               <span>{i.item}</span>
             </div>
+           </Link>
           </div>
         );
       })}

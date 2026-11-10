@@ -4,7 +4,7 @@ import { signIn, useSession } from '@/lib/auth-client'
 import React from 'react'
 
 const Login:React.FC = () => {
- const {data: isPending} = useSession();
+ const {data:session, isPending} = useSession();
  const handleLogin=async()=>{
     await signIn.social({
         provider:"github",
