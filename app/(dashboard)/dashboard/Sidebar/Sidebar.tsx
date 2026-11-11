@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
       id: 2,
       item: "Repositories",
       icon: "git",
-      link:"",
+      link:"/dashboard/repo",
     },
     {
       id: 3,

@@ -1,7 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
+import repoReducer from './slice/repoSlice'
 export const store = configureStore({
   reducer: {
-  _dummy:(state={})=>state
+  repo:repoReducer
   },
 });
 export type RootState = ReturnType<typeof store.getState>;
