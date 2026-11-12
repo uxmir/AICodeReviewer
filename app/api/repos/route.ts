@@ -34,7 +34,8 @@ export async function GET(req: Request) {
     const endIndex: number = startIndex + limit;
     const paginatedData: any = fetchedData?.slice(startIndex, endIndex);
 
-    ApiResponse.ok("data fetched successfully", {
+   return  ApiResponse.ok("data fetched successfully", {
+      installationId:installation.installationId,
       totalPages,
       currentPage,
       paginatedData,
