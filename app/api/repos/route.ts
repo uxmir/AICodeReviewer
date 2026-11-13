@@ -16,20 +16,11 @@ export async function GET(req: Request) {
     const installation = await Installation.findOne({
       installationId: installId,
     });
+
     if (!installation) {
       throw ApiError.notFound("Installation not found in database");
     }
-    //this is if need to fetch manuyalli in db
     const allData:any=installation?.repositories?.reverse();
-
-    //fetching repo by octokit
-    // const app = getGithubApp();
-    // const octokit = await app.getInstallationOctokit(
-    //   installation.installationId,
-    // );
-    // const response = await octokit.rest.apps.listReposAccessibleToInstallation({per_page:100});
-    // const fetchedData = response.data.repositories.reverse() || [];
-
     //paginateddata
     const totalPages: number = Math.ceil(allData.length / limit);
     const currentPage: number = Math.min(Math.max(1, page), totalPages);
