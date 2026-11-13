@@ -4,7 +4,7 @@ const layout:React.FC<{children:ReactNode}>=({children})=> {
   return (
        <div className="flex">
      <Sidebar/>
-      <main className=" w-full">{children}</main>
+      <main className="md:ml-64 w-full">{children}</main>
     </div>
   )
 }

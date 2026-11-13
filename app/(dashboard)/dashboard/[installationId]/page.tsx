@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -15,6 +14,7 @@ import {
   Code2,
   FolderGit2,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import {
   Pagination,
@@ -25,6 +25,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 const Page: React.FC = () => {
   return (
@@ -70,20 +79,11 @@ const FetchRepo: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 max-w-7xl mx-auto space-y-6">
+      <div className="p-8 space-y-6">
         <div className="h-8 w-48 bg-slate-200 animate-pulse rounded-lg" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 animate-pulse">
           {[...Array(6)].map((_, idx) => (
-            <div
-              key={idx}
-              className="h-44 bg-white border border-slate-200 rounded-2xl p-5 animate-pulse flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="h-5 w-2/3 bg-slate-200 rounded" />
-                <div className="h-4 w-full bg-slate-100 rounded" />
-              </div>
-              <div className="h-4 w-1/3 bg-slate-100 rounded" />
-            </div>
+            <div key={idx} className="h-12 bg-slate-100 rounded-lg w-full" />
           ))}
         </div>
       </div>
@@ -91,7 +91,7 @@ const FetchRepo: React.FC = () => {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 space-y-8">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
@@ -117,7 +117,7 @@ const FetchRepo: React.FC = () => {
         </div>
       </div>
 
-      {/* Repository Grid */}
+      {/* Repository Table */}
       {repoList.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-xs">
           <div className="w-12 h-12 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -129,76 +129,72 @@ const FetchRepo: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {repoList.map((r: any) => (
-            <div
-              key={r.id}
-              className="group bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-            >
-              <div>
-                {/* Top Row: Repo Name & Visibility Badge */}
-                <div className="flex items-start justify-between gap-x-2 mb-2">
-                  <div className="min-w-0">
-                    <h3 className="text-base font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
-                      {r?.name}
-                    </h3>
-                    <p className="text-xs text-slate-400 font-mono truncate mt-0.5">
-                      {r?.full_name}
-                    </p>
-                  </div>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <Table>
+            <TableHeader className="bg-slate-50 ">
+              <TableRow className="border-b border-gray-300 px-6">
+                <TableHead className="py-4 font-semibold text-slate-700">Repository</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-700">Status</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-700 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {repoList.map((r: any) => {
+                const firstLetter = r?.name ? r.name.charAt(0).toUpperCase() : "R";
+                return (
+                  <TableRow key={r.id} className="hover:bg-slate-50/60 transition-colors border-b border-gray-300 ">
+                    {/* Repository Name & Avatar */}
+                    <TableCell className="py-4 pl-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                          {firstLetter}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-slate-900 truncate">
+                              {r?.name}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400 font-mono truncate mt-0.5">
+                            {r?.full_name}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
 
-                  <span
-                    className={`shrink-0 inline-flex items-center gap-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
-                      r?.private
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                    }`}
-                  >
-                    {r?.private ? <Lock size={11} /> : <Globe size={11} />}
-                    {r?.private ? "Private" : "Public"}
-                  </span>
-                </div>
+                    {/* Status (Public / Private) */}
+                    <TableCell className="py-4">
+                      <span
+                        className={`inline-flex items-center gap-x-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
+                          r?.private
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        }`}
+                      >
+                        {r?.private ? <Lock size={12} /> : <Globe size={12} />}
+                        {r?.private ? "Private" : "Public"}
+                      </span>
+                    </TableCell>
 
-                {/* Description */}
-                <p className="text-sm text-slate-600 line-clamp-2 mt-3 min-h-[40px]">
-                  {r?.description || "No description provided for this repository."}
-                </p>
-              </div>
-
-              {/* Bottom Metadata & GitHub Link */}
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <div className="flex items-center gap-x-3">
-                  {r?.language && (
-                    <span className="inline-flex items-center gap-x-1 font-medium text-slate-700">
-                      <Code2 size={13} className="text-blue-500" />
-                      {r.language}
-                    </span>
-                  )}
-                  <span className="inline-flex items-center gap-x-1">
-                    <Star size={13} />
-                    {r?.stargazers_count ?? 0}
-                  </span>
-                  <span className="inline-flex items-center gap-x-1">
-                    <GitFork size={13} />
-                    {r?.forks_count ?? 0}
-                  </span>
-                </div>
-
-                {r?.html_url && (
-                  <a
-                    href={r.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-x-1 font-medium text-slate-700 hover:text-slate-900 transition"
-                    title="Open on GitHub"
-                  >
-                    <span>GitHub</span>
-                    <ExternalLink size={13} />
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
+                    {/* Actions (Sync Button) */}
+                    <TableCell className="py-4 pr-4 text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs font-medium border-slate-200 hover:bg-slate-100 cursor-pointer shadow-xs"
+                        onClick={() => {
+                          console.log("Syncing repo:", r?.name);
+                        }}
+                      >
+                        <RefreshCw size={13} className="text-slate-500" />
+                        Sync
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       )}
 
