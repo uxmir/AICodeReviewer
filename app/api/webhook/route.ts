@@ -14,10 +14,10 @@ export async function POST(req: Request) {
 
     const rawBody = await req.text();
     const app = getGithubApp();
-    const isValid = app.webhooks.verify(rawBody,signature);
+    const isValid = app.webhooks.verify(rawBody, signature);
     if (!isValid) throw ApiError.unauthorized("Invalid webhook signature");
     const body = await JSON.parse(rawBody);
-
+    //for repo that exists
     if (event === "installation") {
       const { action, installation, repositories } = body;
       if (action === "created" || action === "added") {
@@ -35,6 +35,33 @@ export async function POST(req: Request) {
         await Installation.findOneAndDelete({
           installationId: installation.id,
         });
+      }
+    }
+    //for repo that is added or removed
+    else if (event === "installation_repositories") {
+      const { action, installation, repositories_added, repositories_removed } =
+        body;
+      const existInstallation = await Installation.findOne({
+        installationId: installation.id,
+      });
+      
+      if (existInstallation) {
+        let updateRepos = existInstallation?.repositories || [];
+        if (action === "added" && repositories_added) {
+          const existingIds = new Set(updateRepos.map((r: any) => r.id));
+          const uniqueNewRepos = repositories_added.filter(
+            (r: any) => !existingIds.has(r.id),
+          );
+          updateRepos = [...updateRepos, ...uniqueNewRepos];
+        }
+         else if (action === "removed" && repositories_removed) {
+          const removedId = repositories_removed?.map((t: any) => t.id);
+          updateRepos = updateRepos?.filter(
+            (t: any) => !removedId.includes(t.id),
+          );
+        }
+        existInstallation.repositories = updateRepos;
+        await existInstallation.save();
       }
     }
     return ApiResponse.ok("Webhook event triggered successfully");

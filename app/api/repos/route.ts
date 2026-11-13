@@ -20,7 +20,7 @@ export async function GET(req: Request) {
       throw ApiError.notFound("Installation not found in database");
     }
     //this is if need to fetch manuyalli in db
-    const allData=installation?.repositories?.reverse();
+    const allData:any=installation?.repositories?.reverse();
 
     //fetching repo by octokit
     // const app = getGithubApp();
