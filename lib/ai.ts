@@ -6,7 +6,7 @@ export const apikeyChecker = () => {
     throw new Error("OPENAI_API_KEY is missing!");
   }
 };
-export const checkOpenAI = async () => {
+export const connectOpenAI = async () => {
   apikeyChecker(); 
   const OpenAI = (await import("openai")).default;
   const client = new OpenAI({
