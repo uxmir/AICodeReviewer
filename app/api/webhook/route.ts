@@ -1,10 +1,13 @@
+import {  ragPipeline, vectorSearch } from './../ingest/functions/ragPipeline';
+import { connectOpenAI } from "@/lib/ai";
 import { dbConnect } from "@/lib/db";
 import Installation from "@/models/Installation";
+import reviewModel from "@/models/reviews";
 import { getGithubApp } from "@/utils/github.app";
 import ApiError from "@/utils/response.error";
 import ApiResponse from "@/utils/response.success";
 
-export async function POST(req: Request) {
+export async function POST(req: Request,id:string, code:string) {
   try {
     await dbConnect();
     const signature = req.headers.get("x-hub-signature-256");
@@ -62,6 +65,40 @@ export async function POST(req: Request) {
         }
         existInstallation.repositories = updateRepos;
         await existInstallation.save();
+      }
+    }
+    // creating ai review in push or pull-request webhook
+    else if(event == "push" || event=== "pull_request"){
+      const {action,repositories_push,repositories_pull_request}=body;
+      const ai=await connectOpenAI();
+      const search=vectorSearch(id,code)
+      const response:any=await ai.chat.completions.create({
+        model:"gpt-6-luna",
+        messages:[{
+          role:"system" ,
+          content:"You are a code reviewer" 
+        },{
+          role:"user",
+          content:`${search}`
+        }]
+      })
+      if(action ==="pushed"){
+        await reviewModel.findOneAndUpdate(
+          {repoId:repositories_push.id},
+          {
+            repoId:repositories_push.id,
+            aiReview:response
+          }, { upsert: true, new: true },
+        )
+      }
+          if(action ==="pull_request"){
+        await reviewModel.findOneAndUpdate(
+          {repoId:repositories_pull_request.id},
+          {
+            repoId:repositories_pull_request.id,
+            aiReview:response 
+          }, { upsert: true, new: true },
+        )
       }
     }
     return ApiResponse.ok("Webhook event triggered successfully");

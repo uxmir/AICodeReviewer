@@ -1,22 +1,30 @@
-
-import  mongoose, {Schema} from 'mongoose';
-const installationSchema=new Schema({
-  installationId:{
-    type:Number,
-    required:true,
-    unique:true
-  } ,
-  account:{
-    type:String,
-  } ,
-  targetType:{
-    type:String
+import mongoose, { Schema, Document } from "mongoose";
+export interface Install extends Document {
+  installationId: number;
+  account: string;
+  targetType: string;
+  repositories: any;
+}
+const installationSchema = new Schema<Install>(
+  {
+    installationId: {
+      type: Number,
+      required: true,
+      unique: true,
+    },
+    account: {
+      type: String,
+    },
+    targetType: {
+      type: String,
+    },
+    repositories: {
+      type: Array,
+      default: [],
+    },
   },
-  repositories:{
-    type:Array,
-    default:[]
-  },
-  
-},{timestamps:true});
+  { timestamps: true },
+);
 
-export default  mongoose.models.Installation || mongoose.model("Installation",installationSchema)
+export default mongoose.models.Installation ||
+  mongoose.model<Install>("Installation", installationSchema);
