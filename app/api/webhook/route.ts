@@ -1,8 +1,6 @@
 import { vectorSearch } from "./../ingest/functions/ragPipeline";
-import { connectOpenAI } from "@/lib/ai";
 import { dbConnect } from "@/lib/db";
 import Installation from "@/models/Installation";
-import reviewModel from "@/models/reviews";
 import { aiAction } from "@/utils/ai-model";
 import { getGithubApp } from "@/utils/github.app";
 import ApiError from "@/utils/response.error";

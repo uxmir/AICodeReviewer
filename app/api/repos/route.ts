@@ -1,6 +1,5 @@
 import { dbConnect } from "@/lib/db";
 import Installation from "@/models/Installation";
-import { getGithubApp } from "@/utils/github.app";
 import ApiError from "@/utils/response.error";
 import ApiResponse from "@/utils/response.success";
 
