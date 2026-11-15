@@ -63,28 +63,28 @@ export async function vectorSearch(repoId:string,code:string){
 const ai=await connectOpenAI();
 await dbConnect();
 const responseEmbedding:any=await ai.embeddings.create({
-  model:"text-embedding-3-small" as string,
+  model:"text-embedding-3-small",
   input:code
 })
 const vectorQuery:any=responseEmbedding.data[0].embedding;
 const result:any=await CodeEmbedding.aggregate([
   {
     $vectorSearch:{
-    index:"vector_index" as string,
-    path:"embedding" as string,
-    queryVector:vectorQuery as any,
-    numCandidates:50 as number,
-    limit:3 as number,
-    filter:{repoId:{$eq:repoId as string}}
+    index:"vector_index" ,
+    path:"embedding" ,
+    queryVector:vectorQuery,
+    numCandidates:50 ,
+    limit:3,
+    filter:{repoId:{$eq:repoId }}
     }
   },
   {
     $project:{
-      _id:1 as number,
-      repoId:1 as number,
-      path:1 as number,
-      code:1 as number,
-      score: { $meta: "vectorSearchScore" as string},
+      _id:1 ,
+      repoId:1 ,
+      path:1,
+      code:1 ,
+      score: { $meta: "vectorSearchScore"},
     }
   }
 ])
