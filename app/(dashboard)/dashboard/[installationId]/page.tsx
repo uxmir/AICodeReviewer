@@ -34,6 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { syncRag } from "@/store/slice/ragApi";
 
 const Page: React.FC = () => {
   return (
@@ -77,6 +78,11 @@ const FetchRepo: React.FC = () => {
     router.push(`/dashboard/${installationId}?page=${newPage}&limit=${limit}`);
   };
 
+  //syncing rag
+  const handleSync = (repoId: string,  repoName: string) => {
+    const owner=repos?.owner as string;
+    dispatch(syncRag({repoId,owner,repoName}))
+  };
   if (loading) {
     return (
       <div className="p-8 space-y-6">
@@ -112,7 +118,8 @@ const FetchRepo: React.FC = () => {
         </div>
 
         <div className="text-sm text-slate-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl shadow-xs">
-          Page <span className="font-semibold text-slate-900">{currentPage}</span> of{" "}
+          Page{" "}
+          <span className="font-semibold text-slate-900">{currentPage}</span> of{" "}
           <span className="font-semibold text-slate-900">{totalPages}</span>
         </div>
       </div>
@@ -123,9 +130,12 @@ const FetchRepo: React.FC = () => {
           <div className="w-12 h-12 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
             <GitBranch size={24} />
           </div>
-          <h3 className="text-lg font-semibold text-slate-800">No Repositories Found</h3>
+          <h3 className="text-lg font-semibold text-slate-800">
+            No Repositories Found
+          </h3>
           <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
-            No repositories are accessible under this installation. Please make sure the GitHub App has repository permissions.
+            No repositories are accessible under this installation. Please make
+            sure the GitHub App has repository permissions.
           </p>
         </div>
       ) : (
@@ -133,16 +143,27 @@ const FetchRepo: React.FC = () => {
           <Table>
             <TableHeader className="bg-slate-50 ">
               <TableRow className="border-b border-gray-300 px-6">
-                <TableHead className="py-4 font-semibold text-slate-700">Repository</TableHead>
-                <TableHead className="py-4 font-semibold text-slate-700">Status</TableHead>
-                <TableHead className="py-4 font-semibold text-slate-700 text-right">Actions</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-700">
+                  Repository
+                </TableHead>
+                <TableHead className="py-4 font-semibold text-slate-700">
+                  Status
+                </TableHead>
+                <TableHead className="py-4 font-semibold text-slate-700 text-right">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {repoList.map((r: any) => {
-                const firstLetter = r?.name ? r.name.charAt(0).toUpperCase() : "R";
+                const firstLetter = r?.name
+                  ? r.name.charAt(0).toUpperCase()
+                  : "R";
                 return (
-                  <TableRow key={r.id} className="hover:bg-slate-50/60 transition-colors border-b border-gray-300 ">
+                  <TableRow
+                    key={r.id}
+                    className="hover:bg-slate-50/60 transition-colors border-b border-gray-300 "
+                  >
                     {/* Repository Name & Avatar */}
                     <TableCell className="py-4 pl-4">
                       <div className="flex items-center gap-3">
@@ -183,7 +204,7 @@ const FetchRepo: React.FC = () => {
                         size="sm"
                         className="h-8 gap-1.5 text-xs font-medium border-slate-200 hover:bg-slate-100 cursor-pointer shadow-xs"
                         onClick={() => {
-                          console.log("Syncing repo:", r?.name);
+                          handleSync(String(r?.id), r?.name);
                         }}
                       >
                         <RefreshCw size={13} className="text-slate-500" />
@@ -246,7 +267,7 @@ const FetchRepo: React.FC = () => {
                       </PaginationLink>
                     </PaginationItem>
                   );
-                }
+                },
               )}
 
               <PaginationItem>

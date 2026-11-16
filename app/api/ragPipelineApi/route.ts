@@ -7,9 +7,9 @@ import { dbConnect } from "@/lib/db";
 export async function POST(req: Request) {
   try {
     const { repoId, owner, repoName } = await req.json();
-    
+
     if (!repoId || !owner || !repoName) {
-      return ApiError.notFound("something is missing");
+     throw ApiError.notFound("something is missing");
     }
     await dbConnect();
     const installationRecord = await Installation.findOne({
@@ -17,9 +17,8 @@ export async function POST(req: Request) {
     });
 
     if (!installationRecord) {
-      return ApiError.notFound("installationid is missing");
+    throw ApiError.notFound("installationid is missing");
     }
-
     await inngest.send({
       name: "rag.sync",
       data: {
@@ -29,7 +28,6 @@ export async function POST(req: Request) {
         installationId: installationRecord.installationId,
       },
     });
-
     return ApiResponse.ok("rag synced successfully");
   } catch (error: any) {
     return ApiError.handleResponse(error);

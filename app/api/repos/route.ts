@@ -32,6 +32,7 @@ export async function GET(req: Request) {
       totalPages,
       currentPage,
       paginatedData,
+      owner:installation?.account
     });
   } catch (error: any) {
     return ApiError.handleResponse(error);

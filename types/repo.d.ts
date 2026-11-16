@@ -2,7 +2,8 @@ export interface Repo{
 installationId:number|null,    
 currentPage:number|null,
 totalPages:number|null,
-paginatedData:repoData[]
+paginatedData:repoData[],
+owner:string
 }
 
 export interface repoData{

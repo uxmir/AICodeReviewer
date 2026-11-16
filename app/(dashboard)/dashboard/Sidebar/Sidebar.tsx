@@ -81,9 +81,9 @@ const SideBarLogic: React.FC = () => {
     },
     {
       id: 3,
-      item: "Pull Requests",
+      item: "Ai Reviews",
       icon: "pullRequests",
-      link: "",
+      link: "/dashboard/aireview",
     },
     {
       id: 4,
