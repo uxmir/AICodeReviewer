@@ -2,6 +2,7 @@ import { connectOpenAI } from "@/lib/ai";
 import { dbConnect } from "@/lib/db";
 import { inngest } from "@/lib/ingest-client";
 import CodeEmbedding from "@/models/codeEmbedding";
+import { getGithubApp } from "@/utils/github.app";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 export const ragPipeline = inngest.createFunction(
@@ -10,42 +11,92 @@ export const ragPipeline = inngest.createFunction(
     triggers: [{ event: "rag.sync" }],
   },
   async ({ event, step }: any) => {
-    const { repoId, filePath, sampleCode } = event.data;
-//chunking code
-    const chunks = await step.run("split-code-into-chunks", async () => {
-      if (!sampleCode) return [];
-      const splitter = RecursiveCharacterTextSplitter.fromLanguage("js", {
+    const { repoId, owner, repoName, installationId } = event.data;
+
+    // Step 1: Fetching all files from GitHub using Octokit
+    const files = await step.run("fetch-github-files", async () => {
+      const app = await getGithubApp();
+      const octokit = await app.getInstallationOctokit(installationId);
+      
+      const { data: repoTree }: any = await octokit.rest.git.getTree({
+        repo: repoName, 
+        owner: owner,
+        tree_sha: "HEAD",
+        recursive: "1",
+      });
+
+      let validFiles: any = [];
+      //fetching all data from gtihub by octokit
+      for (const repoFile of repoTree?.tree || []) {
+        if (repoFile.type === "blob" && /\.(ts|tsx|js|jsx|py|json|md)$/.test(repoFile.path)) {
+          try {
+            const { data: repoData }: any = await octokit.rest.repos.getContent({
+              owner,
+              repo: repoName,
+              path: repoFile.path,
+            });
+
+            if (repoData.content) {
+              const decodedContent = Buffer.from(repoData.content, "base64").toString("utf-8");
+              validFiles.push({ path: repoFile.path, content: decodedContent });
+            }
+          } catch (error: any) {
+            console.error(`File fetching error for ${repoFile.path}:`, error);
+          }
+        }
+      }
+      return validFiles;
+    });
+
+    // Step 2: Chunking code
+    const chunksData = await step.run("split-code-into-chunks", async () => {
+      if (!files || files.length === 0) return [];
+      
+      const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 500,
         chunkOverlap: 50,
       });
-      return await splitter.splitText(sampleCode);
+
+      let allChunks: any = [];
+
+      for (const file of files) {
+        const chunks = await splitter.splitText(file.content);
+        chunks.forEach((chunk, index) => {
+          allChunks.push({
+            path: file.path,
+            chunkIndex: index,
+            code: chunk,
+          });
+        });
+      }
+      return allChunks;
     });
-    //creating embedding
+
+    // Step 3: Creating embeddings and saving to DB
     const upsertResult = await step.run("embed-by-ai", async () => {
-      if (!chunks || chunks.length === 0) {
+      if (!chunksData || chunksData.length === 0) {
         return { totalChunksSaved: 0, message: "No code to embed" };
       }
-
-      await dbConnect()
+      await dbConnect();
       const ai = await connectOpenAI();
       const docsToInsert = await Promise.all(
-        chunks.map(async (chunk: string, index: number) => {
+        chunksData.map(async (item: any) => {
           const responseEmbedding = await ai.embeddings.create({
             model: "text-embedding-3-small",
-            input: chunk,
+            input: item.code,
           });
           return {
             repoId,
-            filePath,
-            chunkIndex: index,
-            code: chunk,
+            repoPath: item.path,
+            chunkIndex: item.chunkIndex,
+            code: item.code,
             embedding: responseEmbedding.data[0].embedding,
           };
         })
       );
-      //deleting and creating db for embedded data
-      await CodeEmbedding.deleteMany({repoId,filePath})
+      await CodeEmbedding.deleteMany({ repoId });
       await CodeEmbedding.insertMany(docsToInsert);
+      
       return { totalChunksSaved: docsToInsert.length };
     });
 
@@ -56,7 +107,6 @@ export const ragPipeline = inngest.createFunction(
     };
   }
 );
-
 //vector search fundtion
 
 export async function vectorSearch(repoId:string,code:string){

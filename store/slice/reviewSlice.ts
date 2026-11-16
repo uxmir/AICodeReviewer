@@ -4,8 +4,8 @@ import { Review } from "@/types/review";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 interface ReviewState {
-  reviews: Review[];       // সব রিভিউ লিস্ট রাখার জন্য
-  review: Review | null;   // সিঙ্গেল রিভিউ ডিটেইলস রাখার জন্য
+  reviews: Review[];       
+  review: Review | null;   
   error: string | null;
   loading: boolean;
 }
