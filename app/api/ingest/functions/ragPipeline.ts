@@ -87,7 +87,7 @@ export const ragPipeline = inngest.createFunction(
           });
           return {
             repoId,
-            repoPath: item.path,
+            filePath: item.path,
             chunkIndex: item.chunkIndex,
             code: item.code,
             embedding: responseEmbedding.data[0].embedding,

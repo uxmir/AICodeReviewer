@@ -22,7 +22,7 @@ export const findAllReview = createAsyncThunk(
   "review/all",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/api/review");
+      const response = await api.get("/review");
       return response?.data?.data || response?.data; 
     } catch (error: any) {
       return rejectWithValue(getErrorMessage(error));
@@ -35,7 +35,7 @@ export const findSingle = createAsyncThunk(
   "review/single",
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/api/review/${id}`); 
+      const response = await api.get(`/review/${id}`); 
       return response?.data?.data || response?.data;
     } catch (error: any) {
       return rejectWithValue(getErrorMessage(error));
