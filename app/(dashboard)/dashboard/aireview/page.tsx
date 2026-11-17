@@ -8,13 +8,16 @@ import { ArrowUpRight, FileCode2 } from "lucide-react";
 const ReviewListPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { reviews, loading } = useAppSelector((state) => state.review);
-
   useEffect(() => {
     dispatch(findAllReview());
   }, [dispatch]);
 
   const reviewData = reviews || [];
-
+  const statusBagde: Record<string, string> = {
+    Reviewed: "bg-green-500",
+    Pending: "bg-blue-500",
+    Failed: "bg-red-500",
+  };
   if (loading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center text-slate-500 font-medium">
@@ -46,7 +49,9 @@ const ReviewListPage: React.FC = () => {
             <div className="mx-auto w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
               <FileCode2 className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-medium text-slate-900">No reviews found</h3>
+            <h3 className="text-sm font-medium text-slate-900">
+              No reviews found
+            </h3>
             <p className="text-xs text-slate-500 mt-1">
               Trigger a review to see logs appear here.
             </p>
@@ -68,14 +73,22 @@ const ReviewListPage: React.FC = () => {
                     </h3>
                   </Link>
                 </div>
-
-                <Link
-                  href={`/dashboard/aireview/${r?._id}`}
-                  className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-2xs"
-                >
-                  View Details
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </Link>
+                <div className="flex flex-col gap-y-2 justify-end items-end">
+                  <span
+                    className={`px-2 py-1 text-white font-medium text-sm rounded-md ${
+                      statusBagde[r?.status] ?? "bg-gray-500"
+                    }`}
+                  >
+                    {r?.status}
+                  </span>
+                  <Link
+                    href={`/dashboard/aireview/${r?._id}`}
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-2xs"
+                  >
+                    View Details
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
