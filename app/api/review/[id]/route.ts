@@ -10,9 +10,9 @@ export async function GET(
   try {
     await dbConnect();
     const { id } = await params; 
-    if (!id) return ApiError.badRequest("Review ID is required");
+    if (!id) return ApiError.handleResponse(ApiError.badRequest("Review ID is required"));
     const response = await reviewModel.findById(id);
-    if (!response) return ApiError.notFound("Review not found");
+    if (!response) return ApiError.handleResponse(ApiError.notFound("Review not found"));
     return ApiResponse.ok("Review found successfully", response);
   } catch (error: any) {
     return ApiError.handleResponse(error);

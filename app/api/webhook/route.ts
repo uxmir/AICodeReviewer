@@ -14,14 +14,14 @@ export async function POST(req: Request) {
     // 2. Extract signature and event name from GitHub webhook headers
     const signature = req.headers.get("x-hub-signature-256");
     const event = req.headers.get("x-github-event");
-    if (!event) throw ApiError.badRequest("GitHub Event header missing");
-    if (!signature) throw ApiError.unauthorized("Webhook signature missing");
+    if (!event) return ApiError.handleResponse(ApiError.badRequest("GitHub Event header missing"));
+    if (!signature) return ApiError.handleResponse(ApiError.unauthorized("Webhook signature missing"));
 
     // 3. Verify webhook request body (Security check: ensure request came from GitHub)
     const rawBody = await req.text();
     const app = getGithubApp();
     const isValid = app.webhooks.verify(rawBody, signature);
-    if (!isValid) throw ApiError.unauthorized("Invalid webhook signature");
+    if (!isValid) return ApiError.handleResponse(ApiError.unauthorized("Invalid webhook signature"));
 
     // Parse raw body into JSON object after verification
     const body = JSON.parse(rawBody);

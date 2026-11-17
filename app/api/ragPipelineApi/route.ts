@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const { repoId, owner, repoName } = await req.json();
 
     if (!repoId || !owner || !repoName) {
-     throw ApiError.notFound("something is missing");
+     return ApiError.handleResponse(ApiError.notFound("something is missing"));
     }
     await dbConnect();
     const installationRecord = await Installation.findOne({
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     });
 
     if (!installationRecord) {
-    throw ApiError.notFound("installationid is missing");
+    return ApiError.handleResponse(ApiError.notFound("installationid is missing"));
     }
     await inngest.send({
       name: "rag.sync",

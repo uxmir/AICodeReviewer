@@ -11,13 +11,13 @@ export async function GET(req: Request) {
     const limit: number = parseInt(searchParams.get("limit") || "10", 10);
     const installId: string | null = searchParams.get("installationId");
 
-    if (!installId) throw ApiError.unauthorized("installationid is not found");
+    if (!installId) return  ApiError.handleResponse(ApiError.unauthorized("installationid is not found"))
     const installation = await Installation.findOne({
       installationId: installId,
     });
 
     if (!installation) {
-      throw ApiError.notFound("Installation not found in database");
+      return ApiError.handleResponse(ApiError.notFound("Installation not found in database"))
     }
     const allData:any=installation?.repositories?.reverse();
     //paginateddata
