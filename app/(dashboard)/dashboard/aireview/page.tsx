@@ -2,17 +2,40 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { findAllReview } from "@/store/slice/reviewSlice";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowUpRight, FileCode2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/errorcatch";
 
 const ReviewListPage: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { reviews, loading } = useAppSelector((state) => state.review);
-  useEffect(() => {
-    dispatch(findAllReview());
-  }, [dispatch]);
+  const [review, setReview] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const reviewData = reviews || [];
+  useEffect(() => {
+    const eventSource = new EventSource("/api/review");
+    eventSource.onmessage = (event: MessageEvent) => {
+      try {
+        const eventData = JSON.parse(event.data);
+        if (eventData?.data) {
+          setReview(eventData.data);
+          setLoading(false);
+        } else if (eventData?.error) {
+          getErrorMessage(new Error(eventData.error));
+          setLoading(false);
+        }
+      } catch (error: any) {
+        getErrorMessage(error);
+        setLoading(false);
+      }
+    };
+    eventSource.onerror = (error: any) => {
+      setLoading(false);
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+  const reviewData = review || [];
   const statusBagde: Record<string, string> = {
     Reviewed: "bg-green-500",
     Pending: "bg-blue-500",
@@ -81,13 +104,21 @@ const ReviewListPage: React.FC = () => {
                   >
                     {r?.status}
                   </span>
-                  <Link
-                    href={`/dashboard/aireview/${r?._id}`}
-                    className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-2xs"
+                  <div
+                    className={`${
+                      r?.status === "Pending"
+                        ? "opacity-40 pointer-events-none cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
                   >
-                    View Details
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </Link>
+                    <Link
+                      href={`/dashboard/aireview/${r?._id}`}
+                      className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-2xs"
+                    >
+                      View Details
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
