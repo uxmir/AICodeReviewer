@@ -1,6 +1,17 @@
 services:
   app:
-    image: aicodereviewer-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MONGO_URI=${MONGO_URI}
+        - OPENAI_API_KEY=${OPENAI_API_KEY}
+        - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+        - NEXT_PUBLIC_BETTER_AUTH_URL=${NEXT_PUBLIC_BETTER_AUTH_URL}
+        - NEXT_PUBLIC_API=${NEXT_PUBLIC_API}
+        - NEXT_PUBLIC_GITHUB_APP_NAME=${NEXT_PUBLIC_GITHUB_APP_NAME}
+        - NEXT_PUBLIC_GITHUB_LINK=${NEXT_PUBLIC_GITHUB_LINK}
+        - NEXT_PUBLIC_GITHUB_APP_INSTALL_URL=${NEXT_PUBLIC_GITHUB_APP_INSTALL_URL}
     container_name: ai-code-reviewer-app
     restart: unless-stopped
     ports:
